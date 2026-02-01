@@ -6,6 +6,6 @@ console.log("[i] Patching Volanta...");
 const asarPath =
   (process.env.LOCALAPPDATA as string) + "/Programs/Volanta/resources/app.asar";
 const outPath = cwd() + "/patched.asar";
-await patch(asarPath, cwd() + "/lib/loader.js", outPath);
+await patch(asarPath, outPath);
 // renameSync(asarPath, asarPath + ".bak");
 copyFileSync(outPath, asarPath);

@@ -2,6 +2,10 @@
 
 A utility to patch the [Volanta](https://volantaapp.com/) desktop client. This tool injects a custom loader script into the application to modify the UI, remove unwanted elements, and clean up the interface.
 
+## Download
+
+Download the latest executable from the [Releases](https://github.com/StarNumber12046/VolantaPatcher/releases) page.
+
 ## Features
 
 The patcher injects `lib/loader.js`, which currently applies the following modifications:

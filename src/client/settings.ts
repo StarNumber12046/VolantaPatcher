@@ -4,22 +4,23 @@ export interface Settings {
   [key: string]: boolean;
 }
 
-const defaultSettings: Settings = {
+export const defaultPatchSettings: Settings = {
   minimalSidebar: true,
   minimalRightPanel: true,
   removeBrowser: true,
   removePremiumSpam: true,
   removeMapboxLogo: true,
   transparentSidebarBottom: true,
+  unlockWeatherLayers: true,
 };
 
 export function getSettings(): Settings {
   try {
     const saved = localStorage.getItem(SETTINGS_KEY);
-    return saved ? { ...defaultSettings, ...JSON.parse(saved) } : defaultSettings;
+    return saved ? { ...defaultPatchSettings, ...JSON.parse(saved) } : defaultPatchSettings;
   } catch (e) {
     console.error("Failed to load settings", e);
-    return defaultSettings;
+    return defaultPatchSettings;
   }
 }
 

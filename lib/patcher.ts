@@ -9,6 +9,9 @@ import {
 } from "fs";
 import { cwd } from "process";
 import { join } from "path";
+import { applyAsarReplacements } from "./asarPatches";
+import { defaultPatchSettings } from "../src/client/settings";
+import { weatherUnlockAsarReplacements } from "./weatherUnlockPatches";
 
 function isScriptLoaded(htmlContent: string) {
   return htmlContent.includes('<script type="module">');
@@ -19,10 +22,11 @@ function removeLoaderScript(htmlContent: string) {
 }
 
 function appendLoaderScript(htmlContent: string, loaderScript: string) {
-  return htmlContent.replace(
-    "</html>",
-    `<script type="module">${loaderScript}</script></html>`,
-  );
+  const tag = `<script type="module">${loaderScript}</script>`;
+  if (htmlContent.includes("</body>")) {
+    return htmlContent.replace("</body>", `${tag}</body>`);
+  }
+  return htmlContent.replace("</html>", `${tag}</html>`);
 }
 
 function patchContents(asarExtractedPath: string, loaderScript: string) {
@@ -40,6 +44,10 @@ async function rebuild(asarExtractedPath: string, asarPath: string) {
   console.log(`[i] Rebuilding ${asarPath} ...`);
   await createPackage(asarExtractedPath, asarPath);
 }
+
+const asarPatchRegistry: Record<string, import("./asarPatches").AsarReplacement[]> = {
+  unlockWeatherLayers: weatherUnlockAsarReplacements,
+};
 
 async function buildLoader(): Promise<string> {
   console.log("[i] Building patches...");
@@ -91,6 +99,17 @@ export async function patch(asarPath: string, outPath: string) {
   mkdirSync(asarExtractedPath);
   extractAll(asarPath, asarExtractedPath);
   console.log(`[i] Patching ${asarPath}...`);
+
+  const asarReplacements = Object.entries(asarPatchRegistry).flatMap(
+    ([patchId, replacements]) =>
+      defaultPatchSettings[patchId] ? replacements : [],
+  );
+
+  if (asarReplacements.length > 0) {
+    console.log(`[i] Applying ${asarReplacements.length} ASAR replacement(s)...`);
+    applyAsarReplacements(asarExtractedPath, asarReplacements);
+  }
+
   patchContents(asarExtractedPath, loaderScript);
   await rebuild(asarExtractedPath, outPath);
   // rmSync(asarExtractedPath, { recursive: true, force: true });
